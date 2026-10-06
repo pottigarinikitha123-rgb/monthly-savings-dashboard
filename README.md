@@ -1,20 +1,35 @@
 # Monthly Savings Dashboard
 
-An interactive financial dashboard that helps you visualize cash flow and track progress toward an annual savings target (default **$10,000**).
+An interactive financial dashboard that helps you visualize cash flow and reach an annual savings target of **$10,000**.
+
+Move the sliders for monthly income, rent, and expenses and the dashboard instantly shows your projected 12-month savings, goal progress, and income allocation, with live visual indicators and smart insights.
 
 ## Features
 
-- **Live sliders** for monthly income, rent, other expenses, and the annual savings goal
-- **KPIs**: monthly savings, projected 12-month savings, savings rate, and months to reach the goal
-- **Goal progress bar** that changes color as you get closer to your target
-- **Income allocation** donut chart (rent, expenses, savings)
-- **Cumulative savings vs. goal** line chart, month by month
-- **Smart insights**, e.g. rent vs. the 30% guideline and savings rate vs. the 50/30/20 rule
+- **Real-time sliders and number inputs** for monthly income, rent, and other expenses
+- **Estimated annual savings**, monthly savings, and savings rate
+- **Goal tracking** with a status badge (goal met / below goal / budget deficit) and a celebration state when the $10k target is reached
+- **$10,000 target progress bar** with milestone ticks
+- **Income breakdown** stacked bar (rent, expenses, savings)
+- **Smart insights**, e.g. a high housing-cost warning when rent is over 40% of income
+- **Quick presets**: Baseline, Frugal, Side Income, Career Level Up
+
+## How it works
+
+```
+Monthly Savings = Income - Rent - Expenses
+Annual Savings  = Monthly Savings x 12
+Goal Progress   = Annual Savings / $10,000
+```
 
 ## How to use
 
-Open `index.html` in any web browser. No installation or internet connection needed.
+Open `index.html` in a web browser (an internet connection is needed to load Tailwind CSS, Font Awesome, and Google Fonts).
 
 ## Tech
 
-Plain HTML, CSS, and JavaScript with charts drawn in inline SVG, with no external libraries. Supports light and dark mode.
+HTML, Tailwind CSS, vanilla JavaScript, Font Awesome icons.
+
+## Showcase
+
+[View on Handshake](https://app.joinhandshake.com/ai-showcase/projects/3526123)

@@ -1,193 +1,569 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Monthly Savings Dashboard</title>
-<style>
-:root{--bg:#f6f7f9;--card:#fff;--text:#1b1f24;--muted:#5b6470;--line:#e3e6ea;--accent:#2f6fdb;--rent:#e07a3f;--exp:#8a63d2;--save:#2e9e6b;--warn:#c9402f;--track:#eceff3}
-@media (prefers-color-scheme:dark){:root{--bg:#111418;--card:#1a1e24;--text:#e8ebef;--muted:#9aa3ae;--line:#2a3038;--accent:#6b9cf0;--rent:#f0955e;--exp:#a888e6;--save:#4cc28c;--warn:#ef6b5a;--track:#262c34}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 40px}
-h1{font-size:26px;margin:0 0 4px}
-.sub{color:var(--muted);margin:0 0 20px}
-.grid{display:grid;gap:16px}
-.top{grid-template-columns:320px 1fr}
-.kpis{grid-template-columns:repeat(4,1fr)}
-.two{grid-template-columns:1fr 1fr}
-@media (max-width:860px){.top,.two{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
-.card h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 14px}
-.ctl{margin-bottom:18px}
-.ctl label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
-.ctl output{font-variant-numeric:tabular-nums;color:var(--accent)}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.kpi .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
-.kpi .l{color:var(--muted);font-size:13px}
-.bar{height:14px;background:var(--track);border-radius:7px;overflow:hidden;margin:10px 0 6px}
-.bar>div{height:100%;background:var(--save);border-radius:7px;transition:width .25s}
-.legend{list-style:none;padding:0;margin:12px 0 0}
-.legend li{display:flex;align-items:center;gap:8px;margin:4px 0;font-variant-numeric:tabular-nums}
-.sw{width:12px;height:12px;border-radius:3px;flex:none}
-.legend span:last-child{margin-left:auto;color:var(--muted)}
-.insights{margin:0;padding-left:18px}
-.insights li{margin:6px 0}
-.neg{color:var(--warn)}
-svg text{fill:var(--muted);font-size:11px}
-footer{color:var(--muted);font-size:13px;margin-top:24px;text-align:center}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Savings Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+        
+        /* Modern Minimalist Range Inputs */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #0f172a;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+            transition: transform 0.15 ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+        }
+        
+        /* Goal Reached Celebration Glow */
+        .goal-achieved-glow {
+            box-shadow: 0 0 0 2px #22c55e, 0 12px 32px -8px rgba(34, 197, 94, 0.35);
+        }
+
+        .goal-achieved-card {
+            background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #0f172a 100%) !important;
+        }
+    </style>
 </head>
-<body>
-<div class="wrap">
-  <h1>Monthly Savings Dashboard</h1>
-  <p class="sub">Adjust your monthly income, rent and expenses to see how close you'll get to your annual savings goal.</p>
+<body class="min-h-screen bg-slate-50/80 text-slate-800 antialiased flex flex-col justify-between p-4 sm:p-6 md:p-10">
 
-  <div class="grid top">
-    <div class="card">
-      <h2>Inputs</h2>
-      <div class="ctl"><label for="income">Monthly income <output id="incomeV"></output></label>
-        <input type="range" id="income" min="1000" max="15000" step="50" value="5000"></div>
-      <div class="ctl"><label for="rent">Rent <output id="rentV"></output></label>
-        <input type="range" id="rent" min="0" max="5000" step="25" value="1500"></div>
-      <div class="ctl"><label for="expenses">Other expenses <output id="expensesV"></output></label>
-        <input type="range" id="expenses" min="0" max="8000" step="25" value="2200"></div>
-      <div class="ctl"><label for="goal">Annual savings goal <output id="goalV"></output></label>
-        <input type="range" id="goal" min="1000" max="50000" step="500" value="10000"></div>
+    <!-- Main Dashboard Container -->
+    <div class="max-w-5xl mx-auto w-full space-y-8">
+
+        <!-- Top Navigation / Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
+            <div>
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold tracking-wide uppercase mb-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Personal Budget
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Savings Dashboard</h1>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-crosshair text-emerald-600"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Annual Target</div>
+                    <div class="text-base font-extrabold text-slate-900">$<span id="goal-target-display">10,000</span></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Calculator Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- LEFT COLUMN: Minimal Sliders Controls (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Sliders Card -->
+                <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200/80 space-y-7">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Monthly Budget Inputs</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Adjust sliders to see real-time impact on annual goal</p>
+                        </div>
+                        <button id="reset-btn" class="text-xs font-semibold text-slate-400 hover:text-slate-700 flex items-center gap-1.5 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-slate-100">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <!-- 1. Monthly Income Slider -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex justify-between items-center">
+                            <label for="income-slider" class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                Monthly Income
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">$</span>
+                                <input type="number" id="income-input" value="3000" min="0" max="25000" step="50"
+                                    class="w-28 pl-7 pr-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-right font-bold text-slate-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition">
+                            </div>
+                        </div>
+                        <input type="range" id="income-slider" min="0" max="15000" step="50" value="3000"
+                            class="accent-emerald-600">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium px-0.5">
+                            <span>$0</span>
+                            <span>$7,500</span>
+                            <span>$15,000+</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Monthly Rent Slider -->
+                    <div class="space-y-3 pt-1">
+                        <div class="flex justify-between items-center">
+                            <label for="rent-slider" class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                                Monthly Rent
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">$</span>
+                                <input type="number" id="rent-input" value="1200" min="0" max="10000" step="25"
+                                    class="w-28 pl-7 pr-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-right font-bold text-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                            </div>
+                        </div>
+                        <input type="range" id="rent-slider" min="0" max="6000" step="25" value="1200"
+                            class="accent-indigo-600">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium px-0.5">
+                            <span>$0</span>
+                            <span>$3,000</span>
+                            <span>$6,000+</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Other Monthly Expenses Slider -->
+                    <div class="space-y-3 pt-1">
+                        <div class="flex justify-between items-center">
+                            <label for="expenses-slider" class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                Other Expenses
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">$</span>
+                                <input type="number" id="expenses-input" value="1000" min="0" max="10000" step="25"
+                                    class="w-28 pl-7 pr-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-right font-bold text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition">
+                            </div>
+                        </div>
+                        <input type="range" id="expenses-slider" min="0" max="6000" step="25" value="1000"
+                            class="accent-amber-500">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium px-0.5">
+                            <span>$0</span>
+                            <span>$3,000</span>
+                            <span>$6,000+</span>
+                        </div>
+                    </div>
+
+                    <!-- Formula Banner -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/60 text-xs text-slate-600">
+                        <div class="font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-calculator text-slate-400"></i> Calculation Logic:
+                        </div>
+                        <div class="font-mono text-[11px] text-slate-500">
+                            Monthly Savings = Income ($<span id="formula-inc">3,000</span>) - Rent ($<span id="formula-rent">1,200</span>) - Expenses ($<span id="formula-exp">1,000</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Presets</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button onclick="applyPreset(3000, 1200, 1000)" class="p-3 rounded-2xl border border-slate-200/80 hover:border-emerald-500 hover:bg-emerald-50/30 transition text-left group">
+                            <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Baseline</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">$3k / $1.2k / $1k</div>
+                        </button>
+                        <button onclick="applyPreset(3000, 1200, 750)" class="p-3 rounded-2xl border border-slate-200/80 hover:border-emerald-500 hover:bg-emerald-50/30 transition text-left group">
+                            <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Frugal</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">Expenses -$250</div>
+                        </button>
+                        <button onclick="applyPreset(3600, 1200, 1000)" class="p-3 rounded-2xl border border-slate-200/80 hover:border-emerald-500 hover:bg-emerald-50/30 transition text-left group">
+                            <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Side Income</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">Income +$600</div>
+                        </button>
+                        <button onclick="applyPreset(4000, 1500, 1200)" class="p-3 rounded-2xl border border-slate-200/80 hover:border-emerald-500 hover:bg-emerald-50/30 transition text-left group">
+                            <div class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Career Level Up</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">$4k / $1.5k / $1.2k</div>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Real-Time Results & Goal Status (5 Cols) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Primary Financial Metrics Card -->
+                <div id="status-card" class="rounded-3xl p-6 sm:p-7 shadow-md transition-all duration-300 border bg-slate-900 text-white relative overflow-hidden">
+                    
+                    <!-- Top Status Badge -->
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Target Tracking</span>
+                        <span id="goal-badge" class="px-3 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition-all">
+                            <!-- Populated dynamically -->
+                        </span>
+                    </div>
+
+                    <!-- Highlighted Annual & Monthly Numbers -->
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Estimated Annual Savings (1 Yr)</div>
+                            <div class="text-4xl sm:text-5xl font-black tracking-tight text-white mt-1.5 flex items-baseline gap-2" id="annual-savings">
+                                $0
+                            </div>
+                            <div id="goal-difference-text" class="text-xs font-semibold mt-2">
+                                <!-- Dynamic deficit / surplus msg -->
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div class="bg-white/10 p-3.5 rounded-2xl border border-white/10 backdrop-blur-md">
+                                <div class="text-[11px] font-medium text-slate-300">Monthly Savings</div>
+                                <div class="text-xl font-extrabold text-white mt-0.5" id="monthly-savings">$0</div>
+                            </div>
+                            <div class="bg-white/10 p-3.5 rounded-2xl border border-white/10 backdrop-blur-md">
+                                <div class="text-[11px] font-medium text-slate-300">Savings Rate</div>
+                                <div class="text-xl font-extrabold text-white mt-0.5" id="savings-rate">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Annual Goal Progress Bar Card -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">$10,000 Annual Target Progress</h3>
+                            <p class="text-slate-400 text-xs">Based on 12 months at current rate</p>
+                        </div>
+                        <span class="text-xl font-black text-slate-900" id="progress-percentage">0%</span>
+                    </div>
+
+                    <!-- Progress Bar Track -->
+                    <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
+                        <div id="progress-bar-fill" class="h-full rounded-full transition-all duration-500 ease-out bg-emerald-500" style="width: 0%"></div>
+                    </div>
+
+                    <!-- Milestone Ticks -->
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 pt-0.5 uppercase tracking-wider">
+                        <span>$0</span>
+                        <span>$2.5k</span>
+                        <span>$5k</span>
+                        <span>$7.5k</span>
+                        <span class="text-emerald-600 font-extrabold">$10k Target</span>
+                    </div>
+                </div>
+
+                <!-- Monthly Income Allocation Breakdown -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between">
+                        <span>Income Breakdown</span>
+                        <span id="allocation-total" class="text-xs font-semibold text-slate-400">$3,000 Total</span>
+                    </h3>
+
+                    <!-- Multi-color Stacked Bar -->
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex">
+                        <div id="bar-rent" class="bg-indigo-500 h-full transition-all duration-300" style="width: 40%"></div>
+                        <div id="bar-expenses" class="bg-amber-500 h-full transition-all duration-300" style="width: 33%"></div>
+                        <div id="bar-savings" class="bg-emerald-500 h-full transition-all duration-300" style="width: 27%"></div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="grid grid-cols-3 gap-2 text-xs pt-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0"></span>
+                            <div class="truncate">
+                                <span class="text-slate-400 text-[11px]">Rent</span>
+                                <div class="font-extrabold text-slate-800" id="pct-rent">0%</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                            <div class="truncate">
+                                <span class="text-slate-400 text-[11px]">Expenses</span>
+                                <div class="font-extrabold text-slate-800" id="pct-exp">0%</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                            <div class="truncate">
+                                <span class="text-slate-400 text-[11px]">Savings</span>
+                                <div class="font-extrabold text-slate-800" id="pct-sav">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights & Recommendations Box -->
+                <div id="insight-card" class="p-4 rounded-3xl border transition-all flex items-start gap-3">
+                    <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700 shrink-0 mt-0.5">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div class="text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-slate-900" id="insight-title">Smart Insight</div>
+                        <div id="insight-body" class="text-slate-600">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="grid" style="align-content:start">
-      <div class="grid kpis">
-        <div class="card kpi"><div class="l">Monthly savings</div><div class="v" id="kMonthly"></div></div>
-        <div class="card kpi"><div class="l">Projected 12-month savings</div><div class="v" id="kYear"></div></div>
-        <div class="card kpi"><div class="l">Savings rate</div><div class="v" id="kRate"></div></div>
-        <div class="card kpi"><div class="l">Months to goal</div><div class="v" id="kMonths"></div></div>
-      </div>
-      <div class="card">
-        <h2>Goal progress</h2>
-        <div class="bar"><div id="progress"></div></div>
-        <div id="progressText" class="l"></div>
-      </div>
-    </div>
-  </div>
+    <script>
+        // Target annual goal
+        const ANNUAL_GOAL = 10000;
 
-  <div class="grid two" style="margin-top:16px">
-    <div class="card">
-      <h2>Income allocation</h2>
-      <svg id="donut" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Income allocation" style="display:block;margin:0 auto"></svg>
-      <ul class="legend" id="legend"></ul>
-    </div>
-    <div class="card">
-      <h2>Cumulative savings vs. goal</h2>
-      <svg id="line" viewBox="0 0 420 240" width="100%" role="img" aria-label="Cumulative savings by month"></svg>
-    </div>
-  </div>
+        // DOM Elements
+        const incomeSlider = document.getElementById('income-slider');
+        const incomeInput = document.getElementById('income-input');
+        const rentSlider = document.getElementById('rent-slider');
+        const rentInput = document.getElementById('rent-input');
+        const expensesSlider = document.getElementById('expenses-slider');
+        const expensesInput = document.getElementById('expenses-input');
 
-  <div class="card" style="margin-top:16px">
-    <h2>Insights</h2>
-    <ul class="insights" id="insights"></ul>
-  </div>
+        // Outputs
+        const annualSavingsEl = document.getElementById('annual-savings');
+        const monthlySavingsEl = document.getElementById('monthly-savings');
+        const savingsRateEl = document.getElementById('savings-rate');
+        const goalDifferenceText = document.getElementById('goal-difference-text');
+        const goalBadge = document.getElementById('goal-badge');
+        const statusCard = document.getElementById('status-card');
 
-  <footer>Monthly Savings Dashboard · by Nikhitha Pottigari</footer>
-</div>
+        // Progress Elements
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const progressPercentage = document.getElementById('progress-percentage');
 
-<script>
-const $ = id => document.getElementById(id);
-const fmt = n => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-US");
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const ids = ["income", "rent", "expenses", "goal"];
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        // Formula Mirror Elements
+        const formulaInc = document.getElementById('formula-inc');
+        const formulaRent = document.getElementById('formula-rent');
+        const formulaExp = document.getElementById('formula-exp');
 
-function arc(cx, cy, r, a0, a1) {
-  const p = a => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  const [x0, y0] = p(a0), [x1, y1] = p(a1);
-  return `M${x0} ${y0} A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1} ${y1}`;
-}
+        // Allocation Bar Elements
+        const allocationTotal = document.getElementById('allocation-total');
+        const barRent = document.getElementById('bar-rent');
+        const barExpenses = document.getElementById('bar-expenses');
+        const barSavings = document.getElementById('bar-savings');
+        const pctRent = document.getElementById('pct-rent');
+        const pctExp = document.getElementById('pct-exp');
+        const pctSav = document.getElementById('pct-sav');
 
-function drawDonut(parts, total) {
-  const sum = Math.max(total, parts.reduce((s, p) => s + Math.max(p.value, 0), 0));
-  let a = -Math.PI / 2, html = `<circle cx="100" cy="100" r="70" fill="none" stroke="${css("--track")}" stroke-width="26"/>`;
-  parts.forEach(p => {
-    if (p.value <= 0 || total <= 0) return;
-    const span = Math.min(p.value / sum, 0.9999) * Math.PI * 2;
-    html += `<path d="${arc(100, 100, 70, a, a + span)}" fill="none" stroke="${p.color}" stroke-width="26"/>`;
-    a += span;
-  });
-  html += `<text x="100" y="96" text-anchor="middle" style="font-size:12px">Income</text>
-           <text x="100" y="116" text-anchor="middle" style="font-size:18px;font-weight:700;fill:${css("--text")}">${fmt(total)}</text>`;
-  $("donut").innerHTML = html;
-  $("legend").innerHTML = parts.map(p =>
-    `<li><span class="sw" style="background:${p.color}"></span><span>${p.label}</span><span>${fmt(p.value)} · ${total > 0 ? Math.round(p.value / total * 100) : 0}%</span></li>`).join("");
-}
+        // Insights
+        const insightCard = document.getElementById('insight-card');
+        const insightTitle = document.getElementById('insight-title');
+        const insightBody = document.getElementById('insight-body');
 
-function drawLine(monthly, goal) {
-  const W = 420, H = 240, L = 48, R = 12, T = 12, B = 28;
-  const vals = MONTHS.map((_, i) => monthly * (i + 1));
-  const hi = Math.max(goal, ...vals, 1), lo = Math.min(0, ...vals);
-  const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw);
-  const min = Math.floor(lo / step) * step, max = Math.ceil(hi * 1.05 / step) * step;
-  const x = i => L + i * (W - L - R) / 11;
-  const y = v => T + (max - v) / (max - min) * (H - T - B);
-  let h = "";
-  for (let v = min; v <= max + 1e-9; v += step) {
-    h += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${css("--line")}"/>
-          <text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.abs(v) >= 1000 ? (v < 0 ? "-$" : "$") + +(Math.abs(v) / 1000).toFixed(1) + "k" : fmt(v)}</text>`;
-  }
-  MONTHS.forEach((m, i) => { if (i % 2 === 0) h += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${m}</text>`; });
-  h += `<line x1="${L}" x2="${W - R}" y1="${y(goal)}" y2="${y(goal)}" stroke="${css("--accent")}" stroke-dasharray="5 4" stroke-width="1.5"/>
-        <text x="${W - R}" y="${y(goal) - 6}" text-anchor="end" style="fill:${css("--accent")}">Goal ${fmt(goal)}</text>`;
-  const col = monthly >= 0 ? css("--save") : css("--warn");
-  h += `<polyline fill="none" stroke="${col}" stroke-width="2.5" points="${vals.map((v, i) => `${x(i)},${y(v)}`).join(" ")}"/>`;
-  vals.forEach((v, i) => h += `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${col}"><title>${MONTHS[i]}: ${fmt(v)}</title></circle>`);
-  $("line").innerHTML = h;
-}
+        // Format currency helper
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
 
-function update() {
-  const [income, rent, expenses, goal] = ids.map(id => +$(id).value);
-  ids.forEach(id => $(id + "V").textContent = fmt(+$(id).value));
-  const monthly = income - rent - expenses;
-  const year = monthly * 12;
-  const rate = income > 0 ? monthly / income : 0;
-  const pct = goal > 0 ? Math.max(0, year / goal) : 0;
+        function calculateSavings() {
+            // Read current values
+            const income = Math.max(0, parseFloat(incomeInput.value) || 0);
+            const rent = Math.max(0, parseFloat(rentInput.value) || 0);
+            const expenses = Math.max(0, parseFloat(expensesInput.value) || 0);
 
-  $("kMonthly").textContent = fmt(monthly);
-  $("kMonthly").className = "v" + (monthly < 0 ? " neg" : "");
-  $("kYear").textContent = fmt(year);
-  $("kRate").textContent = Math.round(rate * 100) + "%";
-  $("kMonths").textContent = monthly > 0 ? Math.ceil(goal / monthly) : "—";
+            // Calculations
+            // Monthly Savings = Income - Rent - Expenses
+            const monthlySavings = income - rent - expenses;
+            // Annual Savings = Monthly Savings * 12
+            const annualSavings = monthlySavings * 12;
 
-  $("progress").style.width = Math.min(pct, 1) * 100 + "%";
-  $("progress").style.background = pct >= 1 ? css("--save") : pct >= 0.6 ? css("--accent") : css("--warn");
-  $("progressText").textContent = `${Math.round(pct * 100)}% of your ${fmt(goal)} goal in 12 months`;
+            // Sync sliders with inputs
+            incomeSlider.value = income;
+            rentSlider.value = rent;
+            expensesSlider.value = expenses;
 
-  drawDonut([
-    { label: "Rent", value: rent, color: css("--rent") },
-    { label: "Other expenses", value: expenses, color: css("--exp") },
-    { label: "Savings", value: Math.max(monthly, 0), color: css("--save") }
-  ], income);
-  drawLine(monthly, goal);
+            // Update formula text display
+            formulaInc.textContent = income.toLocaleString();
+            formulaRent.textContent = rent.toLocaleString();
+            formulaExp.textContent = expenses.toLocaleString();
 
-  const tips = [];
-  const needed = goal / 12;
-  if (monthly <= 0) tips.push(`<span class="neg">You're spending ${fmt(-monthly)} more than you earn each month.</span> Cut rent or expenses to start saving.`);
-  else if (year >= goal) tips.push(`On track: you'll reach your ${fmt(goal)} goal in ${Math.ceil(goal / monthly)} months and finish the year ${fmt(year - goal)} ahead.`);
-  else tips.push(`You need ${fmt(needed)}/month to hit ${fmt(goal)}. You're ${fmt(needed - monthly)}/month short.`);
-  if (income > 0) {
-    const rentShare = rent / income;
-    tips.push(rentShare > 0.3
-      ? `Rent takes ${Math.round(rentShare * 100)}% of income, above the common 30% guideline.`
-      : `Rent is ${Math.round(rentShare * 100)}% of income, within the common 30% guideline.`);
-    tips.push(rate >= 0.2
-      ? `Your savings rate of ${Math.round(rate * 100)}% meets the 20% savings target in the 50/30/20 rule.`
-      : `Raising your savings rate from ${Math.max(0, Math.round(rate * 100))}% to 20% would mean saving ${fmt(income * 0.2)}/month.`);
-  }
-  $("insights").innerHTML = tips.map(t => `<li>${t}</li>`).join("");
-}
+            // Update Monthly & Annual savings numbers
+            monthlySavingsEl.textContent = formatCurrency(monthlySavings);
+            annualSavingsEl.textContent = formatCurrency(annualSavings);
 
-ids.forEach(id => $(id).addEventListener("input", update));
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", update);
-update();
-</script>
+            // Savings Rate
+            const savingsRate = income > 0 ? (monthlySavings / income) * 100 : 0;
+            savingsRateEl.textContent = `${Math.max(0, savingsRate).toFixed(1)}%`;
+
+            // Progress towards $10,000 Goal
+            const progressRatio = Math.max(0, (annualSavings / ANNUAL_GOAL));
+            const progressPercent = Math.min(Math.round(progressRatio * 100), 100);
+            
+            progressBarFill.style.width = `${progressPercent}%`;
+            progressPercentage.textContent = `${Math.round(progressRatio * 100)}%`;
+
+            // Highly Visual Goal Reached State
+            if (annualSavings >= ANNUAL_GOAL) {
+                const surplus = annualSavings - ANNUAL_GOAL;
+                goalBadge.className = "px-3.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20";
+                goalBadge.innerHTML = `<i class="fa-solid fa-circle-check text-slate-950"></i> 🎉 $10k Goal Met!`;
+                
+                statusCard.className = "rounded-3xl p-6 sm:p-7 shadow-xl transition-all duration-300 border border-emerald-500/40 goal-achieved-card text-white relative overflow-hidden goal-achieved-glow";
+                progressBarFill.className = "h-full rounded-full transition-all duration-500 ease-out bg-emerald-400";
+
+                if (surplus > 0) {
+                    goalDifferenceText.innerHTML = `<span class="text-emerald-300 font-bold flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> Exceeds $10k target by ${formatCurrency(surplus)}/yr!</span>`;
+                } else {
+                    goalDifferenceText.innerHTML = `<span class="text-emerald-300 font-bold flex items-center gap-1"><i class="fa-solid fa-check"></i> Directly hits your $10,000 goal!</span>`;
+                }
+            } else if (annualSavings > 0) {
+                const deficit = ANNUAL_GOAL - annualSavings;
+                const neededMonthly = Math.ceil(deficit / 12);
+                
+                goalBadge.className = "px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                goalBadge.innerHTML = `<i class="fa-solid fa-clock"></i> Below $10k Goal`;
+                
+                statusCard.className = "rounded-3xl p-6 sm:p-7 shadow-md transition-all duration-300 border border-slate-800 bg-slate-900 text-white relative overflow-hidden";
+                progressBarFill.className = "h-full rounded-full transition-all duration-500 ease-out bg-amber-500";
+
+                goalDifferenceText.innerHTML = `<span class="text-amber-300 font-semibold">Short by ${formatCurrency(deficit)}/yr (save $${neededMonthly}/mo more to hit target)</span>`;
+            } else {
+                // Deficit
+                const monthlyDeficit = Math.abs(monthlySavings);
+                goalBadge.className = "px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                goalBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Budget Deficit`;
+                
+                statusCard.className = "rounded-3xl p-6 sm:p-7 shadow-md transition-all duration-300 border border-rose-900/50 bg-slate-900 text-white relative overflow-hidden";
+                progressBarFill.className = "h-full rounded-full transition-all duration-500 ease-out bg-rose-500";
+
+                goalDifferenceText.innerHTML = `<span class="text-rose-400 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> Spending exceeds income by ${formatCurrency(monthlyDeficit)} each month!</span>`;
+            }
+
+            // Income Allocation Bar
+            allocationTotal.textContent = `${formatCurrency(income)} Total`;
+            if (income > 0) {
+                const rentPct = Math.max(0, (rent / income) * 100);
+                const expPct = Math.max(0, (expenses / income) * 100);
+                const savPct = Math.max(0, (monthlySavings / income) * 100);
+
+                barRent.style.width = `${rentPct}%`;
+                barExpenses.style.width = `${expPct}%`;
+                barSavings.style.width = `${savPct}%`;
+
+                pctRent.textContent = `${rentPct.toFixed(0)}%`;
+                pctExp.textContent = `${expPct.toFixed(0)}%`;
+                pctSav.textContent = `${savPct.toFixed(0)}%`;
+            } else {
+                barRent.style.width = `0%`;
+                barExpenses.style.width = `0%`;
+                barSavings.style.width = `0%`;
+                pctRent.textContent = `0%`;
+                pctExp.textContent = `0%`;
+                pctSav.textContent = `0%`;
+            }
+
+            // Tailored Insights
+            updateInsights(income, rent, expenses, monthlySavings, annualSavings, savingsRate);
+        }
+
+        function updateInsights(income, rent, expenses, monthlySavings, annualSavings, savingsRate) {
+            const rentRatio = income > 0 ? (rent / income) : 0;
+
+            if (annualSavings >= ANNUAL_GOAL) {
+                insightCard.className = "p-4 rounded-3xl border bg-emerald-50/70 border-emerald-200/80 text-emerald-950 flex items-start gap-3";
+                insightTitle.textContent = "Goal Achieved!";
+                insightBody.textContent = `You are saving ${savingsRate.toFixed(1)}% of your income! At this rate, you'll easily reach $10,000+ per year.`;
+            } else if (monthlySavings > 0) {
+                if (rentRatio > 0.4) {
+                    insightCard.className = "p-4 rounded-3xl border bg-amber-50/70 border-amber-200/80 text-amber-950 flex items-start gap-3";
+                    insightTitle.textContent = "High Housing Expense Ratio";
+                    insightBody.textContent = `Rent represents ${(rentRatio * 100).toFixed(0)}% of your income. Lowering housing or finding roommates is the fastest way to hit $10k/yr.`;
+                } else {
+                    const extraNeeded = Math.ceil((ANNUAL_GOAL - annualSavings) / 12);
+                    insightCard.className = "p-4 rounded-3xl border bg-slate-100 border-slate-200/80 text-slate-800 flex items-start gap-3";
+                    insightTitle.textContent = "Optimization Tip";
+                    insightBody.textContent = `You're currently saving ${formatCurrency(monthlySavings)}/month. Trimming $${extraNeeded}/month from expenses will bridge the gap to $10,000/year!`;
+                }
+            } else {
+                insightCard.className = "p-4 rounded-3xl border bg-rose-50/70 border-rose-200/80 text-rose-950 flex items-start gap-3";
+                insightTitle.textContent = "Deficit Warning";
+                insightBody.textContent = `Expenses exceed monthly income. Cut non-essential spending or supplement income to achieve positive cash flow.`;
+            }
+        }
+
+        // Attach event listeners
+        incomeSlider.addEventListener('input', (e) => {
+            incomeInput.value = e.target.value;
+            calculateSavings();
+        });
+        incomeInput.addEventListener('input', (e) => {
+            incomeSlider.value = e.target.value;
+            calculateSavings();
+        });
+
+        rentSlider.addEventListener('input', (e) => {
+            rentInput.value = e.target.value;
+            calculateSavings();
+        });
+        rentInput.addEventListener('input', (e) => {
+            rentSlider.value = e.target.value;
+            calculateSavings();
+        });
+
+        expensesSlider.addEventListener('input', (e) => {
+            expensesInput.value = e.target.value;
+            calculateSavings();
+        });
+        expensesInput.addEventListener('input', (e) => {
+            expensesSlider.value = e.target.value;
+            calculateSavings();
+        });
+
+        function applyPreset(inc, rnt, exp) {
+            incomeInput.value = inc;
+            rentInput.value = rnt;
+            expensesInput.value = exp;
+            calculateSavings();
+        }
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            applyPreset(3000, 1200, 1000);
+        });
+
+        window.onload = function() {
+            calculateSavings();
+        };
+    </script>
 </body>
 </html>
